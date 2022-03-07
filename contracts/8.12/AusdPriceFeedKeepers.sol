@@ -69,6 +69,10 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
     emit LogPerformUpkeep(block.timestamp);
   }
 
+  function priceFeedersLength() external view returns (uint256) {
+    return priceFeeders.length;
+  }
+
   function setPriceFeeders(IPriceFeedWithDelay[] memory _priceFeeders)
     external
     onlyOwner

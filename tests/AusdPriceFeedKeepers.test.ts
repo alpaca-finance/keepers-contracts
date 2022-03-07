@@ -39,6 +39,8 @@ describe("#AusdPriceFeedKeepers", () => {
       fakePriceFeeders.map((f) => f.address),
       INTERVAL
     );
+
+    expect(await keepers.priceFeedersLength()).to.be.eq(4);
   }
 
   beforeEach(async () => {
