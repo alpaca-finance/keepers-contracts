@@ -2,9 +2,12 @@ import { ethers, waffle } from "hardhat";
 import chai from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
+  AusdPriceFeedKeepers,
+  AusdPriceFeedKeepers__factory,
   EmissionBridgeKeepers,
   EmissionBridgeKeepers__factory,
   IEmissionForwarder,
+  IPriceFeedWithDelay,
 } from "../typechain";
 import { FakeContract, smock } from "@defi-wonderland/smock";
 import { solidity } from "ethereum-waffle";
@@ -15,23 +18,25 @@ chai.should();
 chai.use(smock.matchers);
 const { expect } = chai;
 
-describe("#EmissionBridgeKeepers", () => {
+describe("#AusdPriceFeedKeepers", () => {
   const INTERVAL = timeHelpers.DAY;
 
   let deployer: SignerWithAddress;
 
-  let fakeEmissionForwarder: FakeContract<IEmissionForwarder>;
-  let keepers: EmissionBridgeKeepers;
+  let fakePriceFeeders: Array<FakeContract<IPriceFeedWithDelay>>;
+  let keepers: AusdPriceFeedKeepers;
 
   async function fixture() {
-    fakeEmissionForwarder = await smock.fake("IEmissionForwarder");
+    fakePriceFeeders = [];
+    for (let i = 0; i < 4; i++)
+      fakePriceFeeders.push(await smock.fake("IPriceFeedWithDelay"));
 
-    const EmissionBridgeKeepers = await ethers.getContractFactory(
-      "EmissionBridgeKeepers"
-    );
-    keepers = await EmissionBridgeKeepers.deploy(
-      "Fantom Emission Keepers",
-      fakeEmissionForwarder.address,
+    const AusdPriceFeedKeepers = (await ethers.getContractFactory(
+      "AusdPriceFeedKeepers"
+    )) as AusdPriceFeedKeepers__factory;
+    keepers = await AusdPriceFeedKeepers.deploy(
+      "AUSD Price Feed Keepers",
+      fakePriceFeeders.map((f) => f.address),
       INTERVAL
     );
   }
@@ -96,7 +101,8 @@ describe("#EmissionBridgeKeepers", () => {
 
         // Expect
         const lastTimestamp = await keepers.lastTimestamp();
-        expect(fakeEmissionForwarder.forwardToken).to.have.been.calledOnce;
+        for (let i = 0; i < fakePriceFeeders.length; i++)
+          expect(fakePriceFeeders[i].setPrice).to.have.been.calledOnce;
         expect(lastTimestamp).to.be.eq(await timeHelpers.latestTimestamp());
       });
     });

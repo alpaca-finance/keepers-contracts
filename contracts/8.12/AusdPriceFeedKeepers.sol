@@ -13,36 +13,33 @@ Alpaca Fin Corporation
 
 pragma solidity 0.8.12;
 
-import { Ownable } from "./libs/Ownable.sol";
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
 import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
-import { IEmissionForwarder } from "./interfaces/IEmissionForwarder.sol";
+import { IPriceFeedWithDelay } from "./interfaces/IPriceFeedWithDelay.sol";
 
-/// @title Emission Bridge Keeper - A Chainlink's Keepers compatible contract
-/// for forwarding ALPACA emission to the target chain.
-/// @dev The downstream contract must implement the IEmissionForwarder interface.
+/// @title AusdPriceFeedKeepers - A Chainlink's Keepers to calling set prices on
+/// AUSD's the PriceFeed contract to make sure price is update consistently
 /// @author spicysquid168
 // solhint-disable not-rely-on-time
-contract EmissionBridgeKeepers is
-  Ownable,
-  IntervalKeepers,
-  KeeperCompatibleInterface
-{
-  /// Errors
-  error EmissionBridgeKeeper_NotPassInterval();
+contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
+  // Errors
+  error AusdPriceFeedKeepers_NotPassInterval();
 
-  /// Configs
-  IEmissionForwarder public forwarder;
-
+  // Configs
+  IPriceFeedWithDelay[] public priceFeeders;
+  // Events
   event LogPerformUpkeep(uint256 _timestamp);
+  event LogSetPriceFeedWithDelay(
+    IPriceFeedWithDelay _prevPriceFeeders,
+    IPriceFeedWithDelay[] _newPriceFeeders
+  );
 
   constructor(
     string memory _name,
-    IEmissionForwarder _forwarder,
+    IPriceFeedWithDelay[] memory _priceFeeders,
     uint256 _interval
   ) IntervalKeepers(_name, _interval) {
-    // Effect
-    forwarder = _forwarder;
+    priceFeeders = _priceFeeders;
   }
 
   function checkUpkeep(bytes calldata _checkData)
@@ -55,12 +52,19 @@ contract EmissionBridgeKeepers is
   }
 
   function performUpkeep(
-    bytes calldata /* _performData */
+    bytes memory /* _performData */
   ) external onlyIntervalPassed {
     // Effect
     lastTimestamp = block.timestamp;
-    forwarder.forwardToken();
+    uint256 len = priceFeeders.length;
+    for (uint256 i; i < len; ) {
+      priceFeeders[i].setPrice();
+      unchecked {
+        i++;
+      }
+    }
 
-    emit LogPerformUpkeep(lastTimestamp);
+    // Logs
+    emit LogPerformUpkeep(block.timestamp);
   }
 }
