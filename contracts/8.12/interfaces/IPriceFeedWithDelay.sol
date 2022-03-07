@@ -15,4 +15,6 @@ pragma solidity 0.8.12;
 
 interface IPriceFeedWithDelay {
   function setPrice() external;
+
+  function setPrice(bytes32 _calldata) external;
 }

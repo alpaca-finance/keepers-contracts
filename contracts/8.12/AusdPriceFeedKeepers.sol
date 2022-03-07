@@ -23,10 +23,12 @@ import { IPriceFeedWithDelay } from "./interfaces/IPriceFeedWithDelay.sol";
 // solhint-disable not-rely-on-time
 contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
   /// Errors
+  error AusdPriceFeedKeepers_BadLength();
   error AusdPriceFeedKeepers_NotPassInterval();
 
   /// Configs
   IPriceFeedWithDelay[] public priceFeeders;
+  bytes32[] public calldatas;
 
   /// Events
   event LogPerformUpkeep(uint256 _timestamp);
@@ -34,13 +36,21 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
     IPriceFeedWithDelay[] _prevPriceFeeders,
     IPriceFeedWithDelay[] _newPriceFeeders
   );
+  event LogSetCalldatas(bytes32[] _prevCalldatas, bytes32[] _newCalldatas);
 
   constructor(
     string memory _name,
     IPriceFeedWithDelay[] memory _priceFeeders,
+    bytes32[] memory _calldatas,
     uint256 _interval
   ) IntervalKeepers(_name, _interval) {
+    // Check
+    if (_priceFeeders.length != _calldatas.length)
+      revert AusdPriceFeedKeepers_BadLength();
+
+    // Effect
     priceFeeders = _priceFeeders;
+    calldatas = _calldatas;
   }
 
   function checkUpkeep(bytes calldata _checkData)
@@ -59,7 +69,9 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
     lastTimestamp = block.timestamp;
     uint256 len = priceFeeders.length;
     for (uint256 i; i < len; ) {
-      priceFeeders[i].setPrice();
+      if (calldatas[i] != "") priceFeeders[i].setPrice(calldatas[i]);
+      else priceFeeders[i].setPrice();
+
       unchecked {
         i++;
       }
@@ -73,15 +85,23 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
     return priceFeeders.length;
   }
 
-  function setPriceFeeders(IPriceFeedWithDelay[] memory _priceFeeders)
-    external
-    onlyOwner
-  {
+  function setPriceFeeders(
+    IPriceFeedWithDelay[] memory _newPriceFeeders,
+    bytes32[] memory _newCalldatas
+  ) external onlyOwner {
+    // Check
+    if (_newPriceFeeders.length != _newCalldatas.length)
+      revert AusdPriceFeedKeepers_BadLength();
+
     // Effect
     IPriceFeedWithDelay[] memory _prevPriceFeeders = priceFeeders;
-    priceFeeders = _priceFeeders;
+    bytes32[] memory _prevCalldatas = calldatas;
+
+    priceFeeders = _newPriceFeeders;
+    calldatas = _newCalldatas;
 
     // Logs
-    emit LogSetPriceFeedWithDelay(_prevPriceFeeders, _priceFeeders);
+    emit LogSetPriceFeedWithDelay(_prevPriceFeeders, _newPriceFeeders);
+    emit LogSetCalldatas(_prevCalldatas, _newCalldatas);
   }
 }

@@ -9,6 +9,7 @@
     "hardhat": "^2.9.1"
   },
   "scripts": {
+    "bsc_mainnet:scripts:deploys:exec:ausd-price-feed-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/ausd-price-feed-keepers/index.ts",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test"
   },
