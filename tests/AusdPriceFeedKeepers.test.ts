@@ -4,9 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AusdPriceFeedKeepers,
   AusdPriceFeedKeepers__factory,
-  EmissionBridgeKeepers,
   EmissionBridgeKeepers__factory,
-  IEmissionForwarder,
   IPriceFeedWithDelay,
 } from "../typechain";
 import { FakeContract, smock } from "@defi-wonderland/smock";
@@ -37,6 +35,12 @@ describe("#AusdPriceFeedKeepers", () => {
     keepers = await AusdPriceFeedKeepers.deploy(
       "AUSD Price Feed Keepers",
       fakePriceFeeders.map((f) => f.address),
+      [
+        ethers.utils.formatBytes32String(""),
+        ethers.utils.formatBytes32String(""),
+        ethers.utils.formatBytes32String("ibWBNB"),
+        ethers.utils.formatBytes32String("ibBTCB"),
+      ],
       INTERVAL
     );
 
@@ -103,8 +107,11 @@ describe("#AusdPriceFeedKeepers", () => {
 
         // Expect
         const lastTimestamp = await keepers.lastTimestamp();
-        for (let i = 0; i < fakePriceFeeders.length; i++)
-          expect(fakePriceFeeders[i].setPrice).to.have.been.calledOnce;
+        for (let i = 0; i < 2; i++)
+          expect(fakePriceFeeders[i]["setPrice()"]).to.have.been.calledOnce;
+        for (let i = 2; i < 4; i++)
+          expect(fakePriceFeeders[i]["setPrice(bytes32)"]).to.have.been
+            .calledOnce;
         expect(lastTimestamp).to.be.eq(await timeHelpers.latestTimestamp());
       });
     });
