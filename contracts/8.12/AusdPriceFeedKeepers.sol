@@ -22,15 +22,16 @@ import { IPriceFeedWithDelay } from "./interfaces/IPriceFeedWithDelay.sol";
 /// @author spicysquid168
 // solhint-disable not-rely-on-time
 contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
-  // Errors
+  /// Errors
   error AusdPriceFeedKeepers_NotPassInterval();
 
-  // Configs
+  /// Configs
   IPriceFeedWithDelay[] public priceFeeders;
-  // Events
+
+  /// Events
   event LogPerformUpkeep(uint256 _timestamp);
   event LogSetPriceFeedWithDelay(
-    IPriceFeedWithDelay _prevPriceFeeders,
+    IPriceFeedWithDelay[] _prevPriceFeeders,
     IPriceFeedWithDelay[] _newPriceFeeders
   );
 
@@ -66,5 +67,17 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
 
     // Logs
     emit LogPerformUpkeep(block.timestamp);
+  }
+
+  function setPriceFeeders(IPriceFeedWithDelay[] memory _priceFeeders)
+    external
+    onlyOwner
+  {
+    // Effect
+    IPriceFeedWithDelay[] memory _prevPriceFeeders = priceFeeders;
+    priceFeeders = _priceFeeders;
+
+    // Logs
+    emit LogSetPriceFeedWithDelay(_prevPriceFeeders, _priceFeeders);
   }
 }

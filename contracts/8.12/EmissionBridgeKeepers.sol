@@ -34,6 +34,7 @@ contract EmissionBridgeKeepers is
   /// Configs
   IEmissionForwarder public forwarder;
 
+  /// Events
   event LogPerformUpkeep(uint256 _timestamp);
 
   constructor(
