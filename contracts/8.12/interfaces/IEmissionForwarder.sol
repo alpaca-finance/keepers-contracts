@@ -13,6 +13,12 @@ Alpaca Fin Corporation
 
 pragma solidity 0.8.12;
 
+import { IFairLaunch } from "./IFairLaunch.sol";
+
 interface IEmissionForwarder {
+  function fairLaunch() external view returns (IFairLaunch);
+
   function forwardToken() external;
+
+  function fairLaunchPoolId() external view returns (uint256);
 }

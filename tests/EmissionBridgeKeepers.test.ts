@@ -5,6 +5,7 @@ import {
   EmissionBridgeKeepers,
   EmissionBridgeKeepers__factory,
   IEmissionForwarder,
+  IFairLaunch,
 } from "../typechain";
 import { FakeContract, smock } from "@defi-wonderland/smock";
 import { solidity } from "ethereum-waffle";
@@ -16,15 +17,20 @@ chai.use(smock.matchers);
 const { expect } = chai;
 
 describe("#EmissionBridgeKeepers", () => {
-  const INTERVAL = timeHelpers.DAY;
+  const TRIGGER_WEI = ethers.utils.parseEther("1");
 
   let deployer: SignerWithAddress;
 
+  let fakeFairLaunch: FakeContract<IFairLaunch>;
   let fakeEmissionForwarder: FakeContract<IEmissionForwarder>;
   let keepers: EmissionBridgeKeepers;
 
   async function fixture() {
+    fakeFairLaunch = await smock.fake("IFairLaunch");
     fakeEmissionForwarder = await smock.fake("IEmissionForwarder");
+
+    fakeEmissionForwarder.fairLaunch.returns(fakeFairLaunch.address);
+    fakeEmissionForwarder.fairLaunchPoolId.returns(0);
 
     const EmissionBridgeKeepers = await ethers.getContractFactory(
       "EmissionBridgeKeepers"
@@ -32,7 +38,7 @@ describe("#EmissionBridgeKeepers", () => {
     keepers = await EmissionBridgeKeepers.deploy(
       "Fantom Emission Keepers",
       fakeEmissionForwarder.address,
-      INTERVAL
+      TRIGGER_WEI
     );
   }
 
@@ -40,7 +46,7 @@ describe("#EmissionBridgeKeepers", () => {
     await waffle.loadFixture(fixture);
   });
 
-  context("#setInterval", async () => {
+  context("#setTriggerWei", async () => {
     context("when caller is not the owner", async () => {
       it("should revert", async () => {
         await expect(
@@ -49,30 +55,32 @@ describe("#EmissionBridgeKeepers", () => {
             (
               await ethers.getSigners()
             )[1]
-          ).setInterval(timeHelpers.HOUR)
+          ).setTriggerWei(8)
         ).to.be.revertedWith("Ownable_NotOwner()");
       });
     });
 
     context("when call is the owner", async () => {
       it("should work", async () => {
-        await keepers.setInterval(timeHelpers.HOUR);
-        expect(await keepers.interval()).to.eq(timeHelpers.HOUR);
+        const newTriggerWei = ethers.utils.parseEther("88888");
+        await keepers.setTriggerWei(newTriggerWei);
+        expect(await keepers.triggerWei()).to.eq(newTriggerWei);
       });
     });
   });
 
   context("#checkUpkeep", async () => {
-    context("when time NOT pass the interval", async () => {
+    context("when pendingAlpaca NOT pass triggerWei", async () => {
       it("should return false", async () => {
+        fakeFairLaunch.pendingAlpaca.returns(TRIGGER_WEI.sub(1));
         const upKeepStatus = await keepers.checkUpkeep("0x");
         expect(upKeepStatus[0]).to.be.false;
       });
     });
 
-    context("when time pass the interval", async () => {
+    context("when pendingAlpaca pass the triggerWei", async () => {
       it("should return true", async () => {
-        await timeHelpers.increaseTimestamp(INTERVAL.add(1));
+        fakeFairLaunch.pendingAlpaca.returns(TRIGGER_WEI);
         const upKeepStatus = await keepers.checkUpkeep("0x");
         expect(upKeepStatus[0]).to.be.true;
       });
@@ -80,24 +88,25 @@ describe("#EmissionBridgeKeepers", () => {
   });
 
   context("#performUpkeep", async () => {
-    context("when time NOT pass the interval", async () => {
+    context("when pendingAlpaca NOT pass the triggerWei", async () => {
       it("should revert", async () => {
+        fakeFairLaunch.pendingAlpaca.returns(TRIGGER_WEI.sub(1));
         await expect(keepers.performUpkeep("0x")).to.be.revertedWith(
-          "IntervalKeepers_NotPassInterval()"
+          "EmissionBridgeKeeper_NotPassTriggerWei()"
         );
       });
     });
 
-    context("when time pass the interval", async () => {
+    context("when pendingAlpaca pass the triggerWei", async () => {
       it("should forward token", async () => {
+        // Mock
+        fakeFairLaunch.pendingAlpaca.returns(TRIGGER_WEI);
+
         // Interaction
-        await timeHelpers.increaseTimestamp(INTERVAL.add(1));
         await keepers.performUpkeep("0x");
 
         // Expect
-        const lastTimestamp = await keepers.lastTimestamp();
         expect(fakeEmissionForwarder.forwardToken).to.have.been.calledOnce;
-        expect(lastTimestamp).to.be.eq(await timeHelpers.latestTimestamp());
       });
     });
   });

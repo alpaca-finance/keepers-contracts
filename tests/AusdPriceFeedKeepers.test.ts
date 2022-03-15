@@ -4,7 +4,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AusdPriceFeedKeepers,
   AusdPriceFeedKeepers__factory,
-  EmissionBridgeKeepers__factory,
   IPriceFeedWithDelay,
 } from "../typechain";
 import { FakeContract, smock } from "@defi-wonderland/smock";
@@ -55,7 +54,7 @@ describe("#AusdPriceFeedKeepers", () => {
     context("when caller is not the owner", async () => {
       it("should revert", async () => {
         await expect(
-          EmissionBridgeKeepers__factory.connect(
+          AusdPriceFeedKeepers__factory.connect(
             keepers.address,
             (
               await ethers.getSigners()

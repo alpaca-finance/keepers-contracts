@@ -6,6 +6,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.4.0",
     "@defi-wonderland/smock": "^2.0.7",
+    "@openzeppelin/contracts": "^4.5.0",
     "hardhat": "^2.9.1"
   },
   "scripts": {
