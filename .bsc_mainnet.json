@@ -1,0 +1,14 @@
+{
+  "Keepers": [
+    {
+      "name": "AUSD Oracle Keepers",
+      "address": "0x4acb447A4fc0FA7D95CfD8fef1131526cb7F303F",
+      "upkeepId": "35"
+    },
+    {
+      "name": "Fantom Emission Forwarder",
+      "address": "0x64Fe10F7aFbc6FFBD8f849b7A36a3295c45284AE",
+      "upkeepId": "36"
+    }
+  ]
+}

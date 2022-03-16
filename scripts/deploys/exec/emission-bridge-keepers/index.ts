@@ -2,9 +2,9 @@ import { ethers } from "hardhat";
 import { EmissionBridgeKeepers__factory } from "../../../../typechain";
 
 async function main() {
-  const NAME = "";
-  const FORWARDER = "";
-  const INTERVAL = 86400;
+  const NAME = "Fantom Emission Keepers";
+  const FORWARDER = "0x4F4054B4D286213a39cA5b8eF89116AC62c1cf43";
+  const TRIGGER_WEI = ethers.utils.parseEther("10000");
 
   const EmissionBridgeKeepers = (await ethers.getContractFactory(
     "EmissionBridgeKeepers"
@@ -12,7 +12,7 @@ async function main() {
   const emissionBridgeKeepers = await EmissionBridgeKeepers.deploy(
     NAME,
     FORWARDER,
-    INTERVAL
+    TRIGGER_WEI
   );
 
   await emissionBridgeKeepers.deployTransaction.wait(3);
