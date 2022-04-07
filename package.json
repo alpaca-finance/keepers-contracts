@@ -12,6 +12,7 @@
   "scripts": {
     "bsc_mainnet:scripts:deploys:exec:emission-bridge-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/emission-bridge-keepers/index.ts",
     "bsc_mainnet:scripts:deploys:exec:ausd-price-feed-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/ausd-price-feed-keepers/index.ts",
+    "bsc_mainnet:scripts:deploys:exec:revenue-treasury-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/revenue-treasury-keepers/index.ts",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test"
   },
