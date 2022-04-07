@@ -10,7 +10,15 @@ import "solidity-coverage";
 dotenv.config();
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.12",
+  solidity: {
+    version: "0.8.12",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 168,
+      },
+    },
+  },
   networks: {
     bsc_mainnet: {
       url: process.env.BSC_MAINNET_RPC,
