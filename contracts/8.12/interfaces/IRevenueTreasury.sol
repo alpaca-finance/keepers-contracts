@@ -16,5 +16,16 @@ pragma solidity 0.8.12;
 interface IRevenueTreasury {
   function token() external view returns (address);
 
-  function feedGrassHouse() external;
+  function feedGrassHouse(uint256 minVaultOut, uint256 minGrassHouseOut)
+    external;
+
+  function router() external view returns (address);
+
+  function getRewardPath() external view returns (address[] memory);
+
+  function getVaultSwapPath() external view returns (address[] memory);
+
+  function splitBps() external view returns (uint256);
+
+  function remaining() external view returns (uint256);
 }

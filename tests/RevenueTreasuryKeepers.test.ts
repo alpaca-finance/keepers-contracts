@@ -4,6 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   IERC20,
   IRevenueTreasury,
+  ISwapRouter02Like,
   RevenueTreasuryKeepers,
   RevenueTreasuryKeepers__factory,
 } from "../typechain";
@@ -22,17 +23,19 @@ describe("#RevenueTreasury", () => {
 
   let fakeToken: FakeContract<IERC20>;
   let fakeRevenueTreasury: FakeContract<IRevenueTreasury>;
+  let fakeSwapLikeRouter: FakeContract<ISwapRouter02Like>;
   let keepers: RevenueTreasuryKeepers;
 
   async function fixture() {
     fakeToken = await smock.fake("IERC20");
     fakeRevenueTreasury = await smock.fake("IRevenueTreasury");
+    fakeSwapLikeRouter = await smock.fake("ISwapRouter02Like");
 
     const RevenueTreasuryKeepers = (await ethers.getContractFactory(
       "RevenueTreasuryKeepers"
     )) as RevenueTreasuryKeepers__factory;
     keepers = await RevenueTreasuryKeepers.deploy(
-      "Fantom Emission Keepers",
+      "Revenue Treasury Keepers",
       fakeRevenueTreasury.address,
       TRIGGER_WEI
     );
@@ -77,10 +80,102 @@ describe("#RevenueTreasury", () => {
     });
 
     context("when pendingAlpaca pass the triggerWei", async () => {
-      it("should return true", async () => {
-        fakeToken.balanceOf.returns(TRIGGER_WEI);
-        const upKeepStatus = await keepers.checkUpkeep("0x");
-        expect(upKeepStatus[0]).to.be.true;
+      context("when slippage bps NOT set", async () => {
+        it("should return true with correct data", async () => {
+          fakeToken.balanceOf.returns(TRIGGER_WEI);
+          fakeRevenueTreasury.router.returns(fakeSwapLikeRouter.address);
+          fakeRevenueTreasury.splitBps.returns(5000);
+          fakeRevenueTreasury.remaining.returns(
+            ethers.utils.parseEther("10000")
+          );
+          fakeRevenueTreasury.getRewardPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeRevenueTreasury.getVaultSwapPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeSwapLikeRouter.getAmountsOut.returns([
+            0,
+            ethers.utils.parseEther("5000"),
+          ]);
+
+          const upKeepStatus = await keepers.checkUpkeep("0x");
+          expect(upKeepStatus[0]).to.be.true;
+          expect(upKeepStatus[1]).to.eq(
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint256", "uint256"],
+              [ethers.utils.parseEther("5000"), ethers.utils.parseEther("5000")]
+            )
+          );
+        });
+      });
+
+      context("when slippage bps set to 10 bps", async () => {
+        it("should return true with correct data", async () => {
+          await keepers.setSlippageBps("10");
+
+          fakeToken.balanceOf.returns(TRIGGER_WEI);
+          fakeRevenueTreasury.router.returns(fakeSwapLikeRouter.address);
+          fakeRevenueTreasury.splitBps.returns(5000);
+          fakeRevenueTreasury.remaining.returns(
+            ethers.utils.parseEther("10000")
+          );
+          fakeRevenueTreasury.getRewardPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeRevenueTreasury.getVaultSwapPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeSwapLikeRouter.getAmountsOut.returns([
+            0,
+            ethers.utils.parseEther("5000"),
+          ]);
+
+          const upKeepStatus = await keepers.checkUpkeep("0x");
+          expect(upKeepStatus[0]).to.be.true;
+          expect(upKeepStatus[1]).to.eq(
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint256", "uint256"],
+              [ethers.utils.parseEther("4995"), ethers.utils.parseEther("4995")]
+            )
+          );
+        });
+      });
+
+      context("when remaining is 0", async () => {
+        it("should return true with correct data", async () => {
+          await keepers.setSlippageBps("10");
+
+          fakeToken.balanceOf.returns(TRIGGER_WEI);
+          fakeRevenueTreasury.router.returns(fakeSwapLikeRouter.address);
+          fakeRevenueTreasury.splitBps.returns(5000);
+          fakeRevenueTreasury.remaining.returns("0");
+          fakeRevenueTreasury.getRewardPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeRevenueTreasury.getVaultSwapPath.returns([
+            fakeToken.address,
+            fakeToken.address,
+          ]);
+          fakeSwapLikeRouter.getAmountsOut.returns([
+            0,
+            ethers.utils.parseEther("5000"),
+          ]);
+
+          const upKeepStatus = await keepers.checkUpkeep("0x");
+          expect(upKeepStatus[0]).to.be.true;
+          expect(upKeepStatus[1]).to.eq(
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint256", "uint256"],
+              ["0", ethers.utils.parseEther("4995")]
+            )
+          );
+        });
       });
     });
   });
@@ -101,7 +196,12 @@ describe("#RevenueTreasury", () => {
         fakeToken.balanceOf.returns(TRIGGER_WEI);
 
         // Interaction
-        await keepers.performUpkeep("0x");
+        await keepers.performUpkeep(
+          ethers.utils.defaultAbiCoder.encode(
+            ["uint256", "uint256"],
+            [ethers.utils.parseEther("4995"), ethers.utils.parseEther("4995")]
+          )
+        );
 
         // Expect
         expect(fakeRevenueTreasury.feedGrassHouse).to.have.been.calledOnce;
