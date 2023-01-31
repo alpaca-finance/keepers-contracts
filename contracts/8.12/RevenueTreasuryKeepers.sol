@@ -73,7 +73,7 @@ contract RevenueTreasuryKeepers is
     address[] memory _rewardPath = revenueTreasury.getRewardPath();
     address[] memory _vaultSwapPath = revenueTreasury.getVaultSwapPath();
 
-    // Calculate amount out for each path
+    // Calculate amount out for each part
     uint256 _maxBadDebtPart = (_balanceOfRevenueTreasury * _splitBps) / 10000;
     uint256 _canSettle = _remaining > _maxBadDebtPart
       ? _maxBadDebtPart
