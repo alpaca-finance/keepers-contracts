@@ -3,8 +3,8 @@ import { RevenueTreasuryKeepers__factory } from "../../../../typechain";
 
 async function main() {
   const NAME = "Revenue Treasury Keepers";
-  const REVENUE_TREASURY_ADDRESS = "0x08B5A95cb94f926a8B620E87eE92e675b35afc7E";
-  const TRIGGER_WEI = ethers.utils.parseEther("5000");
+  const REVENUE_TREASURY_ADDRESS = "0x795997Ad55AcFc27148E86408355eC08cA1424A0";
+  const TRIGGER_WEI = ethers.utils.parseEther("2500");
 
   const RevenueTreasuryKeepers = (await ethers.getContractFactory(
     "RevenueTreasuryKeepers"

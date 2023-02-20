@@ -37,6 +37,7 @@ contract Aip15WithdrawKeeper is
 
   /// Configs
   IAip15 public aip15;
+  IFairLaunch public fairLaunch;
   IERC20 public alpaca;
 
   /// Events
@@ -46,18 +47,23 @@ contract Aip15WithdrawKeeper is
   constructor(
     string memory _name,
     IAip15 _aip15,
-    IERC20 _alpaca
+    IFairLaunch _fairLaunch
   ) BasicKeepers(_name) {
     // Effect
     aip15 = _aip15;
-    alpaca = _alpaca;
+    fairLaunch = _fairLaunch;
+    alpaca = IERC20(_fairLaunch.alpaca());
   }
 
   function checkUpkeep(
     bytes calldata /* _checkData */
   ) external view override returns (bool, bytes memory) {
     return (
-      alpaca.balanceOf(address(aip15)) >= aip15.targetEmission() ? true : false,
+      alpaca.balanceOf(address(aip15)) +
+        fairLaunch.pendingAlpaca(29, address(aip15)) >=
+        aip15.targetEmission()
+        ? true
+        : false,
       ""
     );
   }

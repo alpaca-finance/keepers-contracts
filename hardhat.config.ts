@@ -28,6 +28,10 @@ const config: HardhatUserConfig = {
       url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
       accounts: [process.env.TESTNET_DEPLOYER_PRIVATE_KEY!],
     },
+    fantom_mainnet: {
+      url: process.env.FTM_MAINNET_RPC,
+      accounts: [process.env.MAINNET_DEPLOYER_PRIVATE_KEY!],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

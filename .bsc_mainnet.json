@@ -14,6 +14,16 @@
       "name": "Revenue Treasury Keepers",
       "address": "0xee6d18afAae3CBe2fCE9b34edF0fDcF615553d7E",
       "upkeepId": "43"
+    },
+    {
+      "name": "Aip15 Harvest Keeper",
+      "address": "0xcc3b9C16fD9cA4bb3c920bf50E6ee70c97D11d92",
+      "upkeepId": "68914587141254366859770963088431478239252586448686746642318478118785009319672"
+    },
+    {
+      "name": "Aip15 Withdraw Keeper",
+      "address": "0xFFC953FF43bA09B210b8C8A261ab49D38C15cC7F",
+      "upkeepId": "95498999531196890452855734237086842938602040698956997329473529785133300233931"
     }
   ]
 }

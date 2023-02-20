@@ -61,6 +61,8 @@ contract Aip15HarvestKeeper is
   function performUpkeep(
     bytes calldata /* _performData */
   ) external nonReentrant {
+    lastTimestamp = block.timestamp;
+
     aip15.harvest();
     emit LogPerformUpkeep(block.timestamp);
   }

@@ -14,6 +14,8 @@ Alpaca Fin Corporation
 pragma solidity 0.8.12;
 
 interface IFairLaunch {
+  function alpaca() external view returns (address);
+
   function poolLength() external view returns (uint256);
 
   function addPool(
