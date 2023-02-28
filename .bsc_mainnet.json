@@ -2,26 +2,31 @@
   "Keepers": [
     {
       "name": "AUSD Oracle Keepers",
+      "registryAddress": "0x7b3EC232b08BD7b4b3305BE0C044D907B2DF960B",
       "address": "0x4acb447A4fc0FA7D95CfD8fef1131526cb7F303F",
       "upkeepId": "35"
     },
     {
       "name": "Fantom Emission Forwarder",
+      "registryAddress": "0x7b3EC232b08BD7b4b3305BE0C044D907B2DF960B",
       "address": "0x64Fe10F7aFbc6FFBD8f849b7A36a3295c45284AE",
       "upkeepId": "40"
     },
     {
       "name": "Revenue Treasury Keepers",
+      "registryAddress": "0x7b3EC232b08BD7b4b3305BE0C044D907B2DF960B",
       "address": "0xee6d18afAae3CBe2fCE9b34edF0fDcF615553d7E",
       "upkeepId": "43"
     },
     {
       "name": "Aip15 Harvest Keeper",
+      "registryAddress": "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
       "address": "0xcc3b9C16fD9cA4bb3c920bf50E6ee70c97D11d92",
       "upkeepId": "68914587141254366859770963088431478239252586448686746642318478118785009319672"
     },
     {
       "name": "Aip15 Withdraw Keeper",
+      "registryAddress": "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
       "address": "0xFFC953FF43bA09B210b8C8A261ab49D38C15cC7F",
       "upkeepId": "95498999531196890452855734237086842938602040698956997329473529785133300233931"
     }
