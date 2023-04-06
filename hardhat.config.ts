@@ -1,3 +1,4 @@
+import fs from "fs";
 import * as dotenv from "dotenv";
 
 import { HardhatUserConfig } from "hardhat/config";
@@ -6,8 +7,17 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-preprocessor";
 
 dotenv.config();
+
+function getRemappings() {
+  return fs
+    .readFileSync("remappings.txt", "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.trim().split("="));
+}
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -45,6 +55,21 @@ const config: HardhatUserConfig = {
     tests: "./tests",
     cache: "./cache",
     artifacts: "./artifacts",
+  },
+  // This fully resolves paths for imports in the ./lib directory for Hardhat
+  preprocess: {
+    eachLine: (hre) => ({
+      transform: (line: string) => {
+        if (line.match(/^\s*import /i)) {
+          getRemappings().forEach(([find, replace]) => {
+            if (line.match(find)) {
+              line = line.replace(find, replace);
+            }
+          });
+        }
+        return line;
+      },
+    }),
   },
 };
 

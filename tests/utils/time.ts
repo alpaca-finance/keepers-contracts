@@ -18,6 +18,11 @@ export function timestampFloorWeek(t: BigNumberish): BigNumber {
   return bt.div(WEEK).mul(WEEK);
 }
 
+export function timestampNextWeek(t: BigNumberish): BigNumber {
+  const bt = BigNumber.from(t);
+  return timestampFloorWeek(bt).add(WEEK);
+}
+
 export async function latestTimestamp(): Promise<BigNumber> {
   const block = await ethers.provider.getBlock("latest");
   return ethers.BigNumber.from(block.timestamp);
@@ -32,15 +37,17 @@ export async function advanceBlock() {
   await ethers.provider.send("evm_mine", []);
 }
 
-export async function setTimestamp(timeStamp: BigNumber) {
-  await ethers.provider.send("evm_mine", [timeStamp.toNumber()]);
+export async function setTimestamp(timestamp: BigNumberish) {
+  const timestampBN = BigNumber.from(timestamp);
+  await ethers.provider.send("evm_mine", [timestampBN.toNumber()]);
 }
 
-export async function increaseTimestamp(duration: BigNumber) {
-  if (duration.isNegative())
+export async function increaseTimestamp(duration: BigNumberish) {
+  const durationBN = BigNumber.from(duration);
+  if (durationBN.isNegative())
     throw Error(`Cannot increase time by a negative amount (${duration})`);
 
-  await ethers.provider.send("evm_increaseTime", [duration.toNumber()]);
+  await ethers.provider.send("evm_increaseTime", [durationBN.toNumber()]);
 
   await advanceBlock();
 }
