@@ -2,7 +2,7 @@ import { ethers, waffle } from "hardhat";
 import chai from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  IAdminFacet,
+  IMoneyMarket,
   IERC20,
   ISmartTreasury,
   SmartTreasuryDistributeKeeper,
@@ -24,13 +24,13 @@ describe("#SmartTreasury", () => {
   let deployer: SignerWithAddress;
 
   let fakeToken: FakeContract<IERC20>;
-  let moneyMarket: FakeContract<IAdminFacet>;
+  let moneyMarket: FakeContract<IMoneyMarket>;
   let smartTreasury: FakeContract<ISmartTreasury>;
   let keepers: SmartTreasuryDistributeKeeper;
 
   async function fixture() {
     fakeToken = await smock.fake("IERC20");
-    moneyMarket = await smock.fake("IAdminFacet");
+    moneyMarket = await smock.fake("IMoneyMarket");
     smartTreasury = await smock.fake("ISmartTreasury");
 
     const SmartTreasuryDistributeKeeper = (await ethers.getContractFactory(
