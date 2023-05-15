@@ -39,7 +39,7 @@ const config: HardhatUserConfig = {
       accounts: [process.env.TESTNET_DEPLOYER_PRIVATE_KEY!],
     },
     fantom_mainnet: {
-      url: process.env.FTM_MAINNET_RPC,
+      url: process.env.FTM_MAINNET_RPC || 'https://rpc.ftm.tools',
       accounts: [process.env.MAINNET_DEPLOYER_PRIVATE_KEY!],
     },
   },
@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
   },
   paths: {
     sources: "./contracts/8.12",
