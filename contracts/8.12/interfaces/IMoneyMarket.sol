@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: BUSL
 pragma solidity 0.8.12;
 
-import { IAdminFacet } from "./IAdminFacet.sol";
+interface IMoneyMarket {
+  struct WithdrawProtocolReserveParam {
+    address token;
+    address to;
+    uint256 amount;
+  }
 
-interface IMoneyMarket is IAdminFacet {
   function getProtocolReserve(
     address _token
   ) external view returns (uint256 _reserve);
+
+  function withdrawProtocolReserves(
+    WithdrawProtocolReserveParam[] calldata _withdrawProtocolReserveParam
+  ) external;
 }

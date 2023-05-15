@@ -16,7 +16,6 @@ pragma solidity 0.8.12;
 import { Ownable } from "./libs/Ownable.sol";
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
 import { ISmartTreasury } from "./interfaces/ISmartTreasury.sol";
-import { IAdminFacet } from "./interfaces/IAdminFacet.sol";
 import { IMoneyMarket } from "./interfaces/IMoneyMarket.sol";
 
 contract SmartTreasuryDistributeKeeper is IntervalKeepers {
@@ -52,13 +51,13 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
 
     // setup amount, withdraw tokens
     uint256 _distritbutedTokenLength = distributedTokens.length;
-    IAdminFacet.WithdrawProtocolReserveParam[]
-      memory _withdrawParams = new IAdminFacet.WithdrawProtocolReserveParam[](
+    IMoneyMarket.WithdrawProtocolReserveParam[]
+      memory _withdrawParams = new IMoneyMarket.WithdrawProtocolReserveParam[](
         _distritbutedTokenLength
       );
     for (uint256 _i; _i < _distritbutedTokenLength; ) {
       address _token = distributedTokens[_i];
-      _withdrawParams[_i] = IAdminFacet.WithdrawProtocolReserveParam(
+      _withdrawParams[_i] = IMoneyMarket.WithdrawProtocolReserveParam(
         _token,
         address(smartTreasury),
         moneyMarket.getProtocolReserve(_token)
