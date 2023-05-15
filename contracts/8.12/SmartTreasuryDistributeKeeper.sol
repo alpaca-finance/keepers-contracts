@@ -25,7 +25,7 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
   address[] public distributedTokens;
 
   IMoneyMarket public immutable moneyMarket;
-  ISmartTreasury public smartTreasury;
+  ISmartTreasury public immutable smartTreasury;
 
   constructor(
     string memory _name,

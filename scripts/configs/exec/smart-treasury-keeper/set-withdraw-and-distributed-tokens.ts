@@ -4,10 +4,11 @@ import { BigNumberish, Bytes } from "ethers";
 
 async function main() {
   const deployer = (await ethers.getSigners())[0];
-  // TODO:
+  // TODO: pending smart treasury address
   const smartTreasuryDistributeKeeper =
     SmartTreasuryDistributeKeeper__factory.connect("0x", deployer);
 
+  // TODO: pending distributed tokens
   const WBNB = "0x";
   const DISTRIBUTED_TOKENS: Array<string> = [WBNB];
 
