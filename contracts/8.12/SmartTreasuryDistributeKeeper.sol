@@ -13,23 +13,19 @@ Alpaca Fin Corporation
 
 pragma solidity 0.8.12;
 
-import { Ownable } from "contracts/8.12/libs/Ownable.sol";
-import { IntervalKeepers } from "contracts/8.12/libs/IntervalKeepers.sol";
+import { Ownable } from "./libs/Ownable.sol";
+import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
 import { ISmartTreasury } from "./interfaces/ISmartTreasury.sol";
 import { IAdminFacet } from "./interfaces/IAdminFacet.sol";
+import { IMoneyMarket } from "./interfaces/IMoneyMarket.sol";
 
 contract SmartTreasuryDistributeKeeper is IntervalKeepers {
   event LogPerformUpkeep(uint256 _timestamp);
-  event LogSetWithdrawProtocolReserveParams(
-    IAdminFacet.WithdrawProtocolReserveParam[] _withdrawProtocolReserveParams
-  );
   event LogSetDistributedTokens(address[] _distributedTokens);
 
   address[] public distributedTokens;
-  IAdminFacet.WithdrawProtocolReserveParam[]
-    public withdrawProtocolReserveParams;
 
-  IAdminFacet public moneyMarket;
+  IMoneyMarket public moneyMarket;
   ISmartTreasury public smartTreasury;
 
   constructor(
@@ -39,7 +35,7 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
     address _smartTreasury
   ) IntervalKeepers(_name, _interval) {
     smartTreasury = ISmartTreasury(_smartTreasury);
-    moneyMarket = IAdminFacet(_moneyMarket);
+    moneyMarket = IMoneyMarket(_moneyMarket);
   }
 
   function checkUpkeep(
@@ -54,36 +50,31 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
     // Effect
     lastTimestamp = block.timestamp;
 
-    // Interaction
-
-    // 1. Withdraw from money market to smart treasury
-    moneyMarket.withdrawProtocolReserves(withdrawProtocolReserveParams);
-    // 2. Smart Treasury distrbute to other treasury
-    smartTreasury.distribute(distributedTokens);
-
-    emit LogPerformUpkeep(block.timestamp);
-  }
-
-  function resetWithdrawProtocolReserveParams() public onlyOwner {
-    while (withdrawProtocolReserveParams.length != 0) {
-      withdrawProtocolReserveParams.pop();
-    }
-  }
-
-  function setWithdrawProtocolReserveParams(
+    // setup amount, withdraw tokens
+    uint256 _distritbutedTokenLength = distributedTokens.length;
     IAdminFacet.WithdrawProtocolReserveParam[]
-      calldata _withdrawProtocolReserveParams
-  ) external onlyOwner {
-    uint256 _length = _withdrawProtocolReserveParams.length;
-
-    for (uint256 _i; _i < _length; ) {
-      withdrawProtocolReserveParams.push(_withdrawProtocolReserveParams[_i]);
-
+      memory _withdrawParams = new IAdminFacet.WithdrawProtocolReserveParam[](
+        _distritbutedTokenLength
+      );
+    for (uint256 _i; _i < _distritbutedTokenLength; ) {
+      address _token = distributedTokens[_i];
+      _withdrawParams[_i] = IAdminFacet.WithdrawProtocolReserveParam(
+        _token,
+        address(smartTreasury),
+        moneyMarket.getProtocolReserve(_token)
+      );
       unchecked {
         ++_i;
       }
     }
-    emit LogSetWithdrawProtocolReserveParams(_withdrawProtocolReserveParams);
+    // Interaction
+
+    // 1. Withdraw from money market to smart treasury
+    moneyMarket.withdrawProtocolReserves(_withdrawParams);
+    // 2. Smart Treasury distrbute to other treasury
+    smartTreasury.distribute(distributedTokens);
+
+    emit LogPerformUpkeep(block.timestamp);
   }
 
   function setDistributedTokens(
