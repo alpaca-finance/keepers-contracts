@@ -3,6 +3,7 @@ node_modules
 .env
 coverage
 coverage.json
+out
 typechain
 
 #Hardhat files
