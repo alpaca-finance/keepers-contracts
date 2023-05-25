@@ -29,14 +29,17 @@ describe("#SmartTreasury", () => {
   let keepers: SmartTreasuryDistributeKeeper;
 
   async function fixture() {
+    deployer = (await ethers.getSigners())[0];
+
     fakeToken = await smock.fake("IERC20");
     moneyMarket = await smock.fake("IMoneyMarket");
     smartTreasury = await smock.fake("ISmartTreasury");
 
-    const SmartTreasuryDistributeKeeper = (await ethers.getContractFactory(
+    const SmartTreasuryDistributeKeeper = await ethers.getContractFactory(
       "SmartTreasuryDistributeKeeper"
-    )) as SmartTreasuryDistributeKeeper__factory;
-    keepers = await SmartTreasuryDistributeKeeper.deploy(
+    );
+
+    keepers = await SmartTreasuryDistributeKeeper.connect(deployer).deploy(
       "Smart Treasury Keepers",
       INTERVAL,
       moneyMarket.address,
@@ -45,15 +48,15 @@ describe("#SmartTreasury", () => {
 
     // setup withdraw and distribute tokens
     const tokens: Array<string> = [fakeToken.address];
-    keepers.setDistributedTokens(tokens);
+    await keepers.connect(deployer).setDistributedTokens(tokens);
   }
 
   beforeEach(async () => {
     await waffle.loadFixture(fixture);
   });
 
-  context("#checkUpkeep", async () => {
-    context("when time not reached", async () => {
+  context("#checkUpkeep", () => {
+    context("when time not reached", () => {
       it("should return false", async () => {
         const currentTimestamp = await latestTimestamp();
         await setTimestamp(currentTimestamp.add(INTERVAL).sub(1));
@@ -62,7 +65,7 @@ describe("#SmartTreasury", () => {
       });
     });
 
-    context("when time reached", async () => {
+    context("when time reached", () => {
       it("should return true", async () => {
         const currentTimestamp = await latestTimestamp();
         await setTimestamp(currentTimestamp.add(INTERVAL).add(1));
@@ -72,8 +75,8 @@ describe("#SmartTreasury", () => {
     });
   });
 
-  context("#performUpkeep", async () => {
-    context("when not passed", async () => {
+  context("#performUpkeep", () => {
+    context("when not passed", () => {
       it("should revert", async () => {
         await expect(keepers.performUpkeep("0x")).to.be.revertedWith(
           "IntervalKeepers_NotPassInterval()"
@@ -81,7 +84,7 @@ describe("#SmartTreasury", () => {
       });
     });
 
-    context("when passed", async () => {
+    context("when passed", () => {
       it("should withdraw and distribute token", async () => {
         const currentTimestamp = await latestTimestamp();
         await setTimestamp(currentTimestamp.add(INTERVAL).add(1));
@@ -91,6 +94,24 @@ describe("#SmartTreasury", () => {
 
         // Expect
         expect(smartTreasury.distribute).to.have.been.calledOnce;
+      });
+    });
+  });
+
+  context("#distributeTokens", () => {
+    const tokens = ["0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47"];
+    context("set tokens", () => {
+      it("tokens should be set", async () => {
+        await keepers.connect(deployer).setDistributedTokens(tokens);
+
+        expect(await keepers.distributedTokens(0)).to.be.equal(tokens[0]);
+      });
+    });
+    context("add tokens", () => {
+      it("tokens should be added", async () => {
+        await keepers.connect(deployer).addDistributedTokens(tokens);
+
+        expect(await keepers.distributedTokens(1)).to.be.equal(tokens[0]);
       });
     });
   });
