@@ -79,7 +79,7 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
     emit LogPerformUpkeep(block.timestamp);
   }
 
-  function addDistributedTokens(address[] memory _tokens) external onlyOwner {
+  function addDistributedTokens(address[] calldata _tokens) external onlyOwner {
     uint256 _length = _tokens.length;
 
     for (uint256 _i; _i < _length; ) {
