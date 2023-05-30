@@ -2,7 +2,8 @@ import { ethers } from "hardhat";
 import { SmartTreasuryDistributeKeeper__factory } from "../../../../typechain";
 
 async function main() {
-  const smartTreasuryAddress = "";
+  const smartTreasuryKeeper = "";
+
   const DISTRIBUTED_TOKENS: Array<string> = [
     // WBNB
     "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
@@ -28,7 +29,7 @@ async function main() {
 
   const smartTreasuryDistributeKeeper =
     SmartTreasuryDistributeKeeper__factory.connect(
-      smartTreasuryAddress,
+      smartTreasuryKeeper,
       deployer
     );
 
