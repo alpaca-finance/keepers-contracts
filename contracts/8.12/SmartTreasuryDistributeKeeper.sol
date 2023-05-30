@@ -17,10 +17,13 @@ import { Ownable } from "./libs/Ownable.sol";
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
 import { ISmartTreasury } from "./interfaces/ISmartTreasury.sol";
 import { IMoneyMarket } from "./interfaces/IMoneyMarket.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract SmartTreasuryDistributeKeeper is IntervalKeepers {
   event LogPerformUpkeep(uint256 _timestamp);
+  event LogAddDistributedToken(address _token);
   event LogSetDistributedTokens(address[] _distributedTokens);
+  event LogWithdraw(address _to, address _token, uint256 _amount);
 
   address[] public distributedTokens;
 
@@ -76,10 +79,41 @@ contract SmartTreasuryDistributeKeeper is IntervalKeepers {
     emit LogPerformUpkeep(block.timestamp);
   }
 
+  function addDistributedTokens(address[] calldata _tokens) external onlyOwner {
+    uint256 _length = _tokens.length;
+
+    for (uint256 _i; _i < _length; ) {
+      distributedTokens.push(_tokens[_i]);
+      emit LogAddDistributedToken(_tokens[_i]);
+      unchecked {
+        ++_i;
+      }
+    }
+  }
+
   function setDistributedTokens(
     address[] calldata _distributedTokens
   ) external onlyOwner {
     distributedTokens = _distributedTokens;
     emit LogSetDistributedTokens(_distributedTokens);
+  }
+
+  function withdraw(
+    address[] calldata _tokens,
+    address _to
+  ) external onlyOwner {
+    uint256 _length = _tokens.length;
+    for (uint256 _i; _i < _length; ) {
+      _withdraw(_tokens[_i], _to);
+      unchecked {
+        ++_i;
+      }
+    }
+  }
+
+  function _withdraw(address _token, address _to) internal {
+    uint256 _amount = IERC20(_token).balanceOf(address(this));
+    IERC20(_token).transfer(_to, _amount);
+    emit LogWithdraw(_to, _token, _amount);
   }
 }
