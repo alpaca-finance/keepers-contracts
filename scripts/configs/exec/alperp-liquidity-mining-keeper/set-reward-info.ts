@@ -10,10 +10,30 @@ interface SetRewardInfoParams {
 
 async function main() {
   const PARAMS: Array<SetRewardInfoParams> = [
+    // {
+    //   timestamp: 1683158400,
+    //   lpRewards: ethers.utils.parseEther("32000"),
+    //   traderRewards: ethers.utils.parseEther("48000"),
+    // },
+    // {
+    //   timestamp: 1683763200,
+    //   lpRewards: ethers.utils.parseEther("32000"),
+    //   traderRewards: ethers.utils.parseEther("48000"),
+    // },
+    // {
+    //   timestamp: 1684368000,
+    //   lpRewards: ethers.utils.parseEther("32000"),
+    //   traderRewards: ethers.utils.parseEther("48000"),
+    // },
+    // {
+    //   timestamp: 1684972800,
+    //   lpRewards: ethers.utils.parseEther("32000"),
+    //   traderRewards: ethers.utils.parseEther("48000"),
+    // },
     {
-      timestamp: 1680739200,
-      lpRewards: ethers.utils.parseEther("48000"),
-      traderRewards: ethers.utils.parseEther("32000"),
+      timestamp: 1685577600,
+      lpRewards: "0",
+      traderRewards: ethers.utils.parseEther("48000"),
     },
   ];
 
