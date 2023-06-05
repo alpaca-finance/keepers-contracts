@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Aip15HarvestKeeper__factory } from "../../../../typechain";
+import { Aip15HarvestKeeper__factory } from "../../../typechain";
 
 async function main() {
   const NAME = "Aip15 Harvest Keeper";

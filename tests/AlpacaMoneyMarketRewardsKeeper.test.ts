@@ -3,7 +3,9 @@ import chai from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AlpacaMoneyMarketRewardsKeeper,
+  AlpacaMoneyMarketRewardsKeeper__factory,
   IERC20,
+  IFairLaunch,
 } from "../typechain";
 import { FakeContract, smock } from "@defi-wonderland/smock";
 import { solidity } from "ethereum-waffle";
@@ -17,16 +19,16 @@ const { expect } = chai;
 describe("#AlpacaMoneyMarketRewardsKeeper", () => {
   let deployer: SignerWithAddress;
 
+  let fakeMiniFairlaunch: FakeContract<IFairLaunch>;
   let fakeToken: FakeContract<IERC20>;
-  let keeper: ;
+  let keeper: AlpacaMoneyMarketRewardsKeeper;
 
   async function fixture() {
     const signers = await ethers.getSigners();
     deployer = signers[0];
 
     fakeToken = await smock.fake("IERC20");
-    fakeFeedableRewarder = await smock.fake("IAlperpFeedableRewarder");
-    fakeParadeen = await smock.fake("IAlperpParadeen");
+    fakeMiniFairlaunch = await smock.fake("IFairLaunch");
 
     // Move timestamp to start of the next week plus 1 day
     const currentTimestamp = await timeHelpers.latestTimestamp();
@@ -38,13 +40,12 @@ describe("#AlpacaMoneyMarketRewardsKeeper", () => {
         .add(timeHelpers.DAY)
     );
 
-    const AlperpLiquidityMiningKeeper = (await ethers.getContractFactory(
-      "AlperpLiquidityMiningKeeper"
-    )) as AlperpLiquidityMiningKeeper__factory;
-    keeper = await AlperpLiquidityMiningKeeper.deploy(
+    const AlpacaMoneyMarketRewardsKeeper = (await ethers.getContractFactory(
+      "AlpacaMoneyMarketRewardsKeeper"
+    )) as AlpacaMoneyMarketRewardsKeeper__factory;
+    keeper = await AlpacaMoneyMarketRewardsKeeper.deploy(
       fakeToken.address,
-      fakeFeedableRewarder.address,
-      fakeParadeen.address,
+      fakeMiniFairlaunch.address,
       deployer.address
     );
 
@@ -55,6 +56,8 @@ describe("#AlpacaMoneyMarketRewardsKeeper", () => {
 
   beforeEach(async () => {
     await waffle.loadFixture(fixture);
+
+    fakeToken.transferFrom.reset();
   });
 
   context("#checkUpkeep", async () => {
@@ -101,11 +104,9 @@ describe("#AlpacaMoneyMarketRewardsKeeper", () => {
           expect(await keeper.lastUpKeepAt()).to.be.eq(currentTimestamp);
           expect(fakeToken.transferFrom).to.be.calledWith(
             deployer.address,
-            keeper.address,
+            fakeMiniFairlaunch.address,
             ethers.BigNumber.from("0")
           );
-          expect(fakeFeedableRewarder.feedWithExpiredAt).to.be.calledOnce;
-          expect(fakeParadeen.feed).to.be.calledOnce;
 
           // Check up keep
           const upKeepStatus = await keeper.checkUpkeep("0x");
@@ -121,12 +122,7 @@ describe("#AlpacaMoneyMarketRewardsKeeper", () => {
             timeHelpers.timestampNextWeek(currentTimestamp);
           await keeper.setRewardInfo(
             [nextWeekTimestamp],
-            [
-              {
-                lpRewards: ethers.utils.parseEther("48000"),
-                traderRewards: ethers.utils.parseEther("32000"),
-              },
-            ]
+            [ethers.utils.parseEther("86000")]
           );
 
           // Move timestamp to start of the next week
@@ -138,16 +134,8 @@ describe("#AlpacaMoneyMarketRewardsKeeper", () => {
           expect(await keeper.lastUpKeepAt()).to.be.eq(currentTimestamp);
           expect(fakeToken.transferFrom).to.be.calledWith(
             deployer.address,
-            keeper.address,
-            ethers.BigNumber.from("0")
-          );
-          expect(fakeFeedableRewarder.feedWithExpiredAt).to.be.calledWith(
-            ethers.utils.parseEther("48000"),
-            timeHelpers.timestampNextWeek(currentTimestamp)
-          );
-          expect(fakeParadeen.feed).to.be.calledWith(
-            [timeHelpers.timestampFloorWeek(currentTimestamp)],
-            [ethers.utils.parseEther("32000")]
+            fakeMiniFairlaunch.address,
+            ethers.utils.parseEther("86000")
           );
 
           // Check up keep

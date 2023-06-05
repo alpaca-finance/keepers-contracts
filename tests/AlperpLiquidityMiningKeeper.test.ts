@@ -60,6 +60,8 @@ describe("#AlperpLiquidityMiningKeeper", () => {
 
   beforeEach(async () => {
     await waffle.loadFixture(fixture);
+
+    fakeToken.transferFrom.reset();
   });
 
   context("#checkUpkeep", async () => {
@@ -144,7 +146,7 @@ describe("#AlperpLiquidityMiningKeeper", () => {
           expect(fakeToken.transferFrom).to.be.calledWith(
             deployer.address,
             keeper.address,
-            ethers.BigNumber.from("0")
+            ethers.utils.parseEther("80000")
           );
           expect(fakeFeedableRewarder.feedWithExpiredAt).to.be.calledWith(
             ethers.utils.parseEther("48000"),
