@@ -18,6 +18,8 @@
     "bsc_mainnet:scripts:deploys:exec:alperp-liquidity-mining-keeper": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/alperp-liquidity-mining-keeper/index.ts",
     "bsc_mainnet:scripts:configs:exec:alperp-liquidity-mining-keeper:set-reward-info": "npx hardhat --network bsc_mainnet run ./scripts/configs/exec/alperp-liquidity-mining-keeper/set-reward-info.ts",
     "fantom_mainnet:scripts:deploys:exec:time-based-revenue-treasury-keeper": "npx hardhat --network fantom_mainnet run ./scripts/deploys/exec/time-based-revenue-treasury-keeper/index.ts",
+    "bsc_mainnet:scripts:deploys:exec:smart-treasury-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/smart-treasury-keeper/index.ts",
+    "bsc_mainnet:scripts:configs:exec:smart-treasury-keepers:set-distribute-token": "npx hardhat --network bsc_mainnet run ./scripts/configs/exec/smart-treasury-keeper/set-distributed-tokens.ts",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test"
   },
