@@ -16,7 +16,7 @@ pragma solidity 0.8.12;
 import { Ownable } from "./libs/Ownable.sol";
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 import { IAip15 } from "./interfaces/IAip15.sol";
 
 /// @title Aip15 Harvest Keeper - A Chainlink's Keepers compatible contract
@@ -49,12 +49,9 @@ contract Aip15HarvestKeeper is
     aip15 = IAip15(_aip15);
   }
 
-  function checkUpkeep(bytes calldata _checkData)
-    external
-    view
-    override
-    returns (bool, bytes memory)
-  {
+  function checkUpkeep(
+    bytes calldata _checkData
+  ) external view override returns (bool, bytes memory) {
     return _checkUpkeep(_checkData);
   }
 

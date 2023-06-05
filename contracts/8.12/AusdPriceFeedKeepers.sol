@@ -14,7 +14,7 @@ Alpaca Fin Corporation
 pragma solidity 0.8.12;
 
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
-import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 import { IPriceFeedWithDelay } from "./interfaces/IPriceFeedWithDelay.sol";
 
 /// @title AusdPriceFeedKeepers - A Chainlink's Keepers to calling set prices on
@@ -53,12 +53,9 @@ contract AusdPriceFeedKeepers is IntervalKeepers, KeeperCompatibleInterface {
     calldatas = _calldatas;
   }
 
-  function checkUpkeep(bytes calldata _checkData)
-    external
-    view
-    override
-    returns (bool, bytes memory)
-  {
+  function checkUpkeep(
+    bytes calldata _checkData
+  ) external view override returns (bool, bytes memory) {
     return _checkUpkeep(_checkData);
   }
 

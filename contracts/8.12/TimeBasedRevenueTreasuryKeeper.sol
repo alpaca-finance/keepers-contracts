@@ -18,7 +18,7 @@ import { BasicKeepers } from "./libs/BasicKeepers.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IntervalKeepers } from "./libs/IntervalKeepers.sol";
-import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 import { IRevenueTreasury1 } from "./interfaces/IRevenueTreasury1.sol";
 
 /// @title Time-based Revenue Treasury Keeper - A Chainlink's Keepers compatible contract
@@ -45,11 +45,9 @@ contract TimeBasedRevenueTreasuryKeeper is
     revenueTreasury = _revenueTreausry;
   }
 
-  function checkUpkeep(bytes calldata _checkData)
-    external
-    view
-    returns (bool, bytes memory)
-  {
+  function checkUpkeep(
+    bytes calldata _checkData
+  ) external view returns (bool, bytes memory) {
     return _checkUpkeep(_checkData);
   }
 

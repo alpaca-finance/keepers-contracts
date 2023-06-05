@@ -17,7 +17,7 @@ import { Ownable } from "./libs/Ownable.sol";
 import { BasicKeepers } from "./libs/BasicKeepers.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 import { IFairLaunch } from "./interfaces/IFairLaunch.sol";
 import { IAip15 } from "./interfaces/IAip15.sol";
 

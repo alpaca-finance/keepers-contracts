@@ -16,7 +16,7 @@ pragma solidity 0.8.12;
 import { Ownable } from "./libs/Ownable.sol";
 import { BasicKeepers } from "./libs/BasicKeepers.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
+import { KeeperCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 import { IFairLaunch } from "./interfaces/IFairLaunch.sol";
 import { IEmissionForwarder } from "./interfaces/IEmissionForwarder.sol";
 
