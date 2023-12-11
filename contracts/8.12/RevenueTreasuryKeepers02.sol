@@ -72,8 +72,8 @@ contract RevenueTreasuryKeepers02 is
 
     // buyback strategy not initiate
     if (_treasuryBuybackStrategy.nftTokenId() == 0) {
-      uint256 _balanceOfRevenueTreasury = IERC20(revenueTreasury.token())
-        .balanceOf(address(revenueTreasury));
+      uint256 _balanceOfRevenueTreasury = IERC20(revenueTreasury02.token())
+        .balanceOf(address(revenueTreasury02));
 
       // initiate buyback strategy when balance surpass threshold
       if (_balanceOfRevenueTreasury >= triggerWei) {
@@ -85,23 +85,23 @@ contract RevenueTreasuryKeepers02 is
         .getAmountsFromPositionLiquidity();
 
       // verify close logic here
-      bool buybackComplete;
+      bool _buybackComplete;
       uint256 _swapAmount;
 
       if (_accumulatedToken == _treasuryBuybackStrategy.token0()) {
         if (_token1Amount == 0) {
-          buybackComplete = true;
+          _buybackComplete = true;
         }
         _swapAmount = _token1Amount;
       } else if (_accumulatedToken == _treasuryBuybackStrategy.token1()) {
         if (_token0Amount == 0) {
-          buybackComplete = true;
+          _buybackComplete = true;
         }
         _swapAmount = _token0Amount;
       }
 
       // close strategy once reach timelimit or buyback complete
-      if (block.timestamp > initiateAt + timeLimit || buybackComplete) {
+      if (block.timestamp > initiateAt + timeLimit || _buybackComplete) {
         return (true, abi.encode(TreasuryBuybackAction.TERMINATE, _swapAmount));
       }
     }

@@ -20,13 +20,16 @@ interface ITreasuryBuybackStrategy {
 
   function swap(address _tokenIn, uint256 _amountIn) external;
 
-  function nftTokenId() external returns (uint256);
+  function nftTokenId() external view returns (uint256);
 
-  function token0() external returns (address);
+  function token0() external view returns (address);
 
-  function token1() external returns (address);
+  function token1() external view returns (address);
 
-  function accumToken() external returns (address);
+  function accumToken() external view returns (address);
 
-  function getAmountsFromPositionLiquidity() external view returns (uint256 _amount0, uint256 _amount1)
+  function getAmountsFromPositionLiquidity()
+    external
+    view
+    returns (uint256 _amount0, uint256 _amount1);
 }

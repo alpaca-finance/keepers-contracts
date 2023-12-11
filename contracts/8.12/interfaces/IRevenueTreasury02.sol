@@ -23,4 +23,6 @@ interface IRevenueTreasury02 {
   function stopBuybackStrategy() external;
 
   function swapStrategy(uint256 _amountIn) external;
+
+  function feedRevenueDistributor() external;
 }
