@@ -77,7 +77,7 @@ contract RevenueTreasuryKeepers02 is
 
       // initiate buyback strategy when balance surpass threshold
       if (_balanceOfRevenueTreasury >= triggerWei) {
-        return (true, abi.encode(TreasuryBuybackAction.INITIATE, 0));
+        return (true, abi.encode(TreasuryBuybackAction.INITIATE));
       }
     } else {
       address _accumulatedToken = _treasuryBuybackStrategy.accumToken();
@@ -86,23 +86,20 @@ contract RevenueTreasuryKeepers02 is
 
       // verify close logic here
       bool _buybackComplete;
-      uint256 _swapAmount;
-
-      if (_accumulatedToken == _treasuryBuybackStrategy.token0()) {
-        if (_token1Amount == 0) {
-          _buybackComplete = true;
-        }
-        _swapAmount = _token1Amount;
-      } else if (_accumulatedToken == _treasuryBuybackStrategy.token1()) {
-        if (_token0Amount == 0) {
-          _buybackComplete = true;
-        }
-        _swapAmount = _token0Amount;
+      if (
+        (_accumulatedToken == _treasuryBuybackStrategy.token0() &&
+          _token1Amount == 0) ||
+        (_accumulatedToken == _treasuryBuybackStrategy.token1() &&
+          _token0Amount == 0)
+      ) {
+        _buybackComplete = true;
       }
 
-      // close strategy once reach timelimit or buyback complete
-      if (block.timestamp > initiateAt + timeLimit || _buybackComplete) {
-        return (true, abi.encode(TreasuryBuybackAction.TERMINATE, _swapAmount));
+      if (
+        block.timestamp > initiateAt + timeLimit || _buybackComplete
+      ) // close strategy once reach timelimit or buyback complete
+      {
+        return (true, abi.encode(TreasuryBuybackAction.TERMINATE));
       }
     }
 
@@ -112,10 +109,13 @@ contract RevenueTreasuryKeepers02 is
   function performUpkeep(bytes calldata _performData) external nonReentrant {
     // Check
 
-    (TreasuryBuybackAction _treasuryBuybackAction, uint256 _swapAmount) = abi
-      .decode(_performData, (TreasuryBuybackAction, uint256));
+    TreasuryBuybackAction _treasuryBuybackAction = abi.decode(
+      _performData,
+      (TreasuryBuybackAction)
+    );
 
     IRevenueTreasury02 _revenueTreasury02 = revenueTreasury02;
+    IERC20 _revenueTreasuryToken = IERC20(_revenueTreasury02.token());
 
     if (_treasuryBuybackAction == TreasuryBuybackAction.INITIATE) {
       initiateAt = block.timestamp;
@@ -124,8 +124,16 @@ contract RevenueTreasuryKeepers02 is
     } else if (_treasuryBuybackAction == TreasuryBuybackAction.TERMINATE) {
       initiateAt = 0;
 
+      uint256 _balanceOfRevenueTreasuryBefore = _revenueTreasuryToken.balanceOf(
+        address(_revenueTreasury02)
+      );
+
       // remove liquidity
       _revenueTreasury02.stopBuybackStrategy();
+
+      uint256 _swapAmount = _revenueTreasuryToken.balanceOf(
+        address(_revenueTreasury02)
+      ) - _balanceOfRevenueTreasuryBefore;
 
       // swap reaming token
       if (_swapAmount > 0) {
