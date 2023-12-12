@@ -61,6 +61,7 @@ contract RevenueTreasuryKeepers02 is
     // Effect
     revenueTreasury02 = _revenueTreausry02;
     triggerWei = _triggerWei;
+    // validate timelimit to prevent terminate lp right after initiate buyback
     if (_timeLimit < 600) {
       revert RevenueTreasuryKeepers02_TimeLimitTooLow();
     }
