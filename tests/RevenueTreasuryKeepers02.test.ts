@@ -185,7 +185,7 @@ describe("#RevenueTreasury02", () => {
   });
 
   context("#performUpkeep", async () => {
-    context("when action is initiate", async () => {
+    context("when action is initiate with pass trigger wei", async () => {
       it("should stamp initiateAt", async () => {
         await keepers02.performUpkeep(
           ethers.utils.defaultAbiCoder.encode(
@@ -201,8 +201,25 @@ describe("#RevenueTreasury02", () => {
         expect(initiateAt).to.eq(block.timestamp);
       });
     });
+
+    context("when action is initiate with not pass trigger wei", async () => {
+      it("should revert", async () => {
+        fakeUSDT.balanceOf.returns(TRIGGER_WEI.sub(1));
+
+        await expect(
+          keepers02.performUpkeep(
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint256"],
+              [TreasuryBuybackAction.INITIATE]
+            )
+          )
+        ).to.be.revertedWith("RevenueTreasuryKeepers02_NotPassTriggerWei()");
+      });
+    });
+
     context("when action is terminate", async () => {
       it("should reset initiateAt to 0", async () => {
+        fakeUSDT.balanceOf.returns(TRIGGER_WEI.add(1));
         await keepers02.performUpkeep(
           ethers.utils.defaultAbiCoder.encode(
             ["uint256"],
@@ -211,6 +228,9 @@ describe("#RevenueTreasury02", () => {
         );
 
         expect(await keepers02.initiateAt()).to.not.eq(BigNumber.from(0));
+        await fakeTreasuryBuybackStrategy.getAmountsFromPositionLiquidity.returns(
+          [BigNumber.from(0), BigNumber.from(1)]
+        );
 
         await keepers02.performUpkeep(
           ethers.utils.defaultAbiCoder.encode(
@@ -225,6 +245,39 @@ describe("#RevenueTreasury02", () => {
         expect(fakeRevenueTreasury02.feedRevenueDistributor).to.have.been
           .calledOnce;
       });
+
+      context(
+        "when not pass time limit and buyback not completed",
+        async () => {
+          it("should revert", async () => {
+            fakeUSDT.balanceOf.returns(TRIGGER_WEI.add(1));
+
+            await keepers02.performUpkeep(
+              ethers.utils.defaultAbiCoder.encode(
+                ["uint256"],
+                [TreasuryBuybackAction.INITIATE]
+              )
+            );
+
+            expect(await keepers02.initiateAt()).to.not.eq(BigNumber.from(0));
+
+            fakeTreasuryBuybackStrategy.getAmountsFromPositionLiquidity.returns(
+              [BigNumber.from(1), BigNumber.from(1)]
+            );
+
+            await expect(
+              keepers02.performUpkeep(
+                ethers.utils.defaultAbiCoder.encode(
+                  ["uint256"],
+                  [TreasuryBuybackAction.TERMINATE]
+                )
+              )
+            ).to.be.revertedWith(
+              "RevenueTreasuryKeepers02_InvalidTerminateCondition()"
+            );
+          });
+        }
+      );
     });
   });
 });

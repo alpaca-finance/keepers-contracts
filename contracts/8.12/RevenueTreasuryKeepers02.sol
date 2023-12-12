@@ -33,6 +33,7 @@ contract RevenueTreasuryKeepers02 is
   /// Errors
   error RevenueTreasuryKeepers02_NotPassTriggerWei();
   error RevenueTreasuryKeepers02_TimeLimitTooLow();
+  error RevenueTreasuryKeepers02_InvalidTerminateCondition();
 
   /// Configs
   IRevenueTreasury02 public revenueTreasury02;
@@ -86,25 +87,7 @@ contract RevenueTreasuryKeepers02 is
         return (true, abi.encode(TreasuryBuybackAction.INITIATE));
       }
     } else {
-      address _accumulatedToken = _treasuryBuybackStrategy.accumToken();
-      (uint256 _token0Amount, uint256 _token1Amount) = _treasuryBuybackStrategy
-        .getAmountsFromPositionLiquidity();
-
-      // verify close logic here
-      bool _buybackComplete;
-      if (
-        (_accumulatedToken == _treasuryBuybackStrategy.token0() &&
-          _token1Amount == 0) ||
-        (_accumulatedToken == _treasuryBuybackStrategy.token1() &&
-          _token0Amount == 0)
-      ) {
-        _buybackComplete = true;
-      }
-
-      if (
-        block.timestamp > initiateAt + timeLimit || _buybackComplete
-      ) // close strategy once reach timelimit or buyback complete
-      {
+      if (_allowTerminate()) {
         return (true, abi.encode(TreasuryBuybackAction.TERMINATE));
       }
     }
@@ -124,10 +107,22 @@ contract RevenueTreasuryKeepers02 is
     IERC20 _revenueTreasuryToken = IERC20(_revenueTreasury02.token());
 
     if (_treasuryBuybackAction == TreasuryBuybackAction.INITIATE) {
+      uint256 _balanceOfRevenueTreasury = _revenueTreasuryToken.balanceOf(
+        address(_revenueTreasury02)
+      );
+
+      if (_balanceOfRevenueTreasury < triggerWei) {
+        revert RevenueTreasuryKeepers02_NotPassTriggerWei();
+      }
+      // initiate buyback strategy when balance surpass threshold
       initiateAt = block.timestamp;
 
       _revenueTreasury02.initiateBuybackStrategy();
     } else if (_treasuryBuybackAction == TreasuryBuybackAction.TERMINATE) {
+      if (!_allowTerminate()) {
+        revert RevenueTreasuryKeepers02_InvalidTerminateCondition();
+      }
+
       initiateAt = 0;
 
       uint256 _balanceOfRevenueTreasuryBefore = _revenueTreasuryToken.balanceOf(
@@ -171,5 +166,31 @@ contract RevenueTreasuryKeepers02 is
     timeLimit = _timeLimit;
 
     emit LogSetTimeLimit(_prevTimeLimit, _timeLimit);
+  }
+
+  function _allowTerminate() internal view returns (bool _allow) {
+    ITreasuryBuybackStrategy _treasuryBuybackStrategy = ITreasuryBuybackStrategy(
+        revenueTreasury02.treasuryBuybackStrategy()
+      );
+    address _accumulatedToken = _treasuryBuybackStrategy.accumToken();
+    (uint256 _token0Amount, uint256 _token1Amount) = _treasuryBuybackStrategy
+      .getAmountsFromPositionLiquidity();
+
+    bool _buybackComplete;
+    if (
+      (_accumulatedToken == _treasuryBuybackStrategy.token0() &&
+        _token1Amount == 0) ||
+      (_accumulatedToken == _treasuryBuybackStrategy.token1() &&
+        _token0Amount == 0)
+    ) {
+      _buybackComplete = true;
+    }
+
+    if (
+      block.timestamp > initiateAt + timeLimit || _buybackComplete
+    ) // close strategy once reach timelimit or buyback complete
+    {
+      _allow = true;
+    }
   }
 }
