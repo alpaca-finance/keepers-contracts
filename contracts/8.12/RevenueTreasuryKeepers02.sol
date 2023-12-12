@@ -32,6 +32,7 @@ contract RevenueTreasuryKeepers02 is
 {
   /// Errors
   error RevenueTreasuryKeepers02_NotPassTriggerWei();
+  error RevenueTreasuryKeepers02_TimeLimitTooLow();
 
   /// Configs
   IRevenueTreasury02 public revenueTreasury02;
@@ -60,6 +61,10 @@ contract RevenueTreasuryKeepers02 is
     // Effect
     revenueTreasury02 = _revenueTreausry02;
     triggerWei = _triggerWei;
+    if (_timeLimit < 600) {
+      revert RevenueTreasuryKeepers02_TimeLimitTooLow();
+    }
+
     timeLimit = _timeLimit;
   }
 
@@ -136,7 +141,8 @@ contract RevenueTreasuryKeepers02 is
       ) - _balanceOfRevenueTreasuryBefore;
 
       // swap reaming token
-      if (_swapAmount > 0) {
+      // check against 1e18 to prevent precision loss when _swapAmount is very small
+      if (_swapAmount > 1e18) {
         _revenueTreasury02.swapStrategy(_swapAmount);
       }
 
@@ -156,6 +162,9 @@ contract RevenueTreasuryKeepers02 is
   }
 
   function setTimeLimit(uint256 _timeLimit) external onlyOwner {
+    if (_timeLimit < 600) {
+      revert RevenueTreasuryKeepers02_TimeLimitTooLow();
+    }
     // Effect
     uint256 _prevTimeLimit = _timeLimit;
     timeLimit = _timeLimit;
