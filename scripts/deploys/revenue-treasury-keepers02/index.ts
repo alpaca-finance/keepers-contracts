@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { RevenueTreasuryKeepers02__factory } from "../../../../typechain";
+import { RevenueTreasuryKeepers02__factory } from "../../../typechain";
 
 async function main() {
   const NAME = "Revenue Treasury Keepers02";
