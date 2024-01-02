@@ -22,7 +22,7 @@ import { IRevenueTreasury02 } from "./interfaces/IRevenueTreasury02.sol";
 import { ITreasuryBuybackStrategy } from "./interfaces/ITreasuryBuybackStrategy.sol";
 
 /// @title Revenue Treasury Keepers - A Chainlink's Keepers compatible contract
-/// for up keep ALPACA to be distributed
+/// Distribute Alpaca once the balance pass certian threshold
 // solhint-disable not-rely-on-time
 contract RevenueTreasuryAlpacaBalanceKeepers02 is
   Ownable,
