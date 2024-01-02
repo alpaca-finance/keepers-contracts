@@ -56,7 +56,7 @@ contract RevenueTreasuryAlpacaBalanceKeepers02 is
   ) external view override returns (bool, bytes memory) {
     // initiate distribution when balance more than threshold
     if (alpaca.balanceOf(address(revenueTreasury02)) >= triggerWei) {
-      return (true, abi.encode());
+      return (true, "");
     }
 
     return (false, "");
