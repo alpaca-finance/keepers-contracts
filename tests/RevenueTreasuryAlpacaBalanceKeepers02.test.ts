@@ -26,11 +26,6 @@ describe("#RevenueTreasuryAlpacaBalanceKeepers02", () => {
   let fakeRevenueTreasury02: FakeContract<IRevenueTreasury02>;
   let keepers02: RevenueTreasuryAlpacaBalanceKeepers02;
 
-  const TreasuryBuybackAction: Record<"INITIATE" | "TERMINATE", BigNumber> = {
-    INITIATE: BigNumber.from(0),
-    TERMINATE: BigNumber.from(1),
-  };
-
   async function fixture() {
     fakeUSDT = await smock.fake("IERC20");
     fakeALPACA = await smock.fake("IERC20");
