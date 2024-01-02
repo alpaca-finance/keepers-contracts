@@ -21,13 +21,11 @@ describe("#RevenueTreasuryAlpacaBalanceKeepers02", () => {
 
   let deployer: SignerWithAddress;
 
-  let fakeUSDT: FakeContract<IERC20>;
   let fakeALPACA: FakeContract<IERC20>;
   let fakeRevenueTreasury02: FakeContract<IRevenueTreasury02>;
   let keepers02: RevenueTreasuryAlpacaBalanceKeepers02;
 
   async function fixture() {
-    fakeUSDT = await smock.fake("IERC20");
     fakeALPACA = await smock.fake("IERC20");
     fakeRevenueTreasury02 = await smock.fake("IRevenueTreasury02");
 
@@ -41,8 +39,6 @@ describe("#RevenueTreasuryAlpacaBalanceKeepers02", () => {
       fakeALPACA.address,
       TRIGGER_WEI
     );
-
-    fakeRevenueTreasury02.token.returns(fakeUSDT.address);
   }
 
   beforeEach(async () => {
