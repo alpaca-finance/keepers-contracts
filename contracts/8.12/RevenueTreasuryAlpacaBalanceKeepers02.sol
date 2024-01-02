@@ -30,9 +30,6 @@ contract RevenueTreasuryAlpacaBalanceKeepers02 is
   BasicKeepers,
   KeeperCompatibleInterface
 {
-  /// Errors
-  error RevenueTreasuryKeepers02_NotPassTriggerWei();
-
   /// Configs
   IRevenueTreasury02 public revenueTreasury02;
   IERC20 public alpaca;
