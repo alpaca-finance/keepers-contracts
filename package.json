@@ -14,6 +14,7 @@
     "fantom_mainnet:scripts:deploys:exec:revenue-treasury-keepers": "npx hardhat --network fantom_mainnet run ./scripts/deploys/exec/revenue-treasury-keepers/index.ts",
     "bsc_mainnet:scripts:deploys:exec:revenue-treasury-keepers": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/revenue-treasury-keepers/index.ts",
     "bsc_mainnet:scripts:deploys:exec:revenue-treasury-keepers02": "npx hardhat --network bsc_mainnet run ./scripts/deploys/revenue-treasury-keepers02/index.ts",
+    "bsc_mainnet:scripts:deploys:exec:revenue-treasury-alpaca-balance-keepers02": "npx hardhat --network bsc_mainnet run ./scripts/deploys/revenue-treasury-alpaca-balance-keepers02/index.ts",
     "bsc_mainnet:scripts:deploys:exec:aip15-harvest-keeper": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/aip15-harvest-keeper/index.ts",
     "bsc_mainnet:scripts:deploys:exec:aip15-withdraw-keeper": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/aip15-withdraw-keeper/index.ts",
     "bsc_mainnet:scripts:deploys:exec:alperp-liquidity-mining-keeper": "npx hardhat --network bsc_mainnet run ./scripts/deploys/exec/alperp-liquidity-mining-keeper/index.ts",
